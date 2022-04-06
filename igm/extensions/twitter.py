@@ -11,8 +11,8 @@ with open("./secrets/twitter") as t:
     _twitter_access = _twitter[2]
     _twitter_access_secret = _twitter[3]
 
-authenticator = tweepy.OAuth1UserHandler(_twitter_api, _twitter_secret_api)
-authenticator.set_access_token(_twitter_access, _twitter_access_secret)
+authenticator = tweepy.OAuth1UserHandler(os.environ['TWITTER_API'], os.environ['TWITTER_API_SECRET'])
+authenticator.set_access_token(os.environ['TWITTER_ACCESS'], os.environ['TWITTER_ACCESS_SECRET'])
 
 api = tweepy.API(authenticator, wait_on_rate_limit=True)
 #client = tweepy.Client(TWITTER_BEARER, wait_on_rate_limit=True)
@@ -38,6 +38,12 @@ class Listener(tweepy.Stream):
 async def twitter(ctx: lightbulb.Context) -> None:
     pass
 
+@plugin.command
+@lightbulb.command("say", "Twitter Command Group")
+@lightbulb.implements(lightbulb.PrefixCommand, lightbulb.SlashCommand)
+async def twitter(ctx: lightbulb.Context) -> None:
+    await ctx.respond('what?')
+
 @twitter.child
 @lightbulb.option('username', 'Twitter Handle', type=str)
 @lightbulb.command("bind", "[Work in progress] Streams user's tweets in the channel.")
@@ -46,8 +52,8 @@ async def bind(ctx: lightbulb.Context) -> None:
     if (ctx.options.username != "Iwus237"):
         streams.append(ctx.options.username)
         stream = Listener(
-        _twitter_api, _twitter_secret_api,
-        _twitter_access, _twitter_access_secret
+        os.environ['TWITTER_API'], os.environ['TWITTER_API_SECRET'],
+        os.environ['TWITTER_ACCESS'], os.environ['TWITTER_ACCESS_SECRET']
         )
         for user in streams:
             user_ids.append(api.get_user(screen_name = user).id)
